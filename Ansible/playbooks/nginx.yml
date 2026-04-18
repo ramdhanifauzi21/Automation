@@ -1,0 +1,43 @@
+---
+- name: Setup Nginx Reverse Proxy
+  hosts: gateway
+  become: true
+
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Copy Nginx config
+      copy:
+        dest: /etc/nginx/sites-available/fauzi
+        content: |
+          server {
+              listen 80;
+              server_name {{ domain }};
+
+              location / {
+                  proxy_pass http://IP_FAUZI_APP:{{ frontend_port }};
+                  proxy_set_header Host $host;
+                  proxy_set_header X-Real-IP $remote_addr;
+              }
+          }
+
+    - name: Enable Nginx config
+      file:
+        src: /etc/nginx/sites-available/fauzi
+        dest: /etc/nginx/sites-enabled/fauzi
+        state: link
+
+    - name: Remove default Nginx config
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
+        enabled: yes

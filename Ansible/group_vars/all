@@ -1,0 +1,15 @@
+# User
+username: ramdhani
+user_password: "Ramdhani123!"
+
+# Domain
+domain: fauzi.studentdumbways.my.id
+
+# App
+frontend_repo: https://github.com/ramdhanifauzi21/wayshub-frontend.git
+frontend_port: 3000
+
+# Monitoring
+prometheus_port: 9090
+grafana_port: 3001
+node_exporter_port: 9100

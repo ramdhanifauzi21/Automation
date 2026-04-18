@@ -1,0 +1,55 @@
+- name: Install Monitoring (Node Exporter, Prometheus, Grafana)
+  hosts: all
+  become: true
+
+  tasks:
+    # Node Exporter
+    - name: Run Node Exporter
+      community.docker.docker_container:
+        name: node-exporter
+        image: prom/node-exporter:latest
+        state: started
+        restart_policy: always
+        published_ports:
+          - "{{ node_exporter_port }}:9100"
+
+    # Prometheus
+    - name: Create Prometheus config directory
+      file:
+        path: /home/{{ ansible_user }}/prometheus
+        state: directory
+
+    - name: Copy Prometheus config
+      copy:
+        dest: /home/{{ ansible_user }}/prometheus/prometheus.yml
+        content: |
+          global:
+            scrape_interval: 15s
+          scrape_configs:
+            - job_name: 'node-exporter-app'
+              static_configs:
+                - targets: ['157.10.160.146:{{ node_exporter_port }}']
+            - job_name: 'node-exporter-gateway'
+              static_configs:
+                - targets: ['103.31.39.130:{{ node_exporter_port }}']
+
+    - name: Run Prometheus
+      community.docker.docker_container:
+        name: prometheus
+        image: prom/prometheus:latest
+        state: started
+        restart_policy: always
+        published_ports:
+          - "{{ prometheus_port }}:9090"
+        volumes:
+          - /home/{{ ansible_user }}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+    # Grafana
+    - name: Run Grafana
+      community.docker.docker_container:
+        name: grafana
+        image: grafana/grafana:latest
+        state: started
+        restart_policy: always
+        published_ports:
+          - "{{ grafana_port }}:3000"

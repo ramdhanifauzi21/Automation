@@ -1,0 +1,33 @@
+---
+- name: Generate SSL Certificate via Certbot Cloudflare
+  hosts: gateway
+  become: true
+
+  tasks:
+    - name: Install Certbot and Cloudflare plugin
+      apt:
+        name:
+          - certbot
+          - python3-certbot-nginx
+        state: present
+        update_cache: yes
+
+    - name: Generate SSL certificate
+      command: >
+        certbot --nginx
+        -d {{ domain }}
+        --non-interactive
+        --agree-tos
+        --email admin@{{ domain }}
+        --redirect
+      args:
+        creates: /etc/letsencrypt/live/{{ domain }}
+
+    - name: Auto renew SSL
+      cron:
+        name: "Certbot renewal"
+        job: "certbot renew --quiet"
+        minute: "0"
+        hour: "0"
+        day: "1"
+        month: "*"

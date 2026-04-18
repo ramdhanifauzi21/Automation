@@ -1,0 +1,9 @@
+[app]
+fauzi-app ansible_host=157.10.160.146 
+
+[gateway]
+fauzi-gateway ansible_host=103.31.39.130 
+
+[all:vars]
+ansible_user=ramdhani
+ansible_ssh_private_key_file=~/.ssh/id_ed25519

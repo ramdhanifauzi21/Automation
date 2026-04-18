@@ -1,0 +1,34 @@
+---
+- name: Create new user with SSH key and password
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Create user {{ username }}
+      user:
+        name: "{{ username }}"
+        password: "{{ user_password | password_hash('sha512') }}"
+        shell: /bin/bash
+        groups: sudo
+        append: yes
+        state: present
+
+    - name: Create .ssh directory
+      file:
+        path: /home/{{ username }}/.ssh
+        state: directory
+        owner: "{{ username }}"
+        group: "{{ username }}"
+        mode: '0700'
+
+    - name: Copy SSH public key
+      authorized_key:
+        user: "{{ username }}"
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+
+    - name: Allow sudo without password
+      lineinfile:
+        path: /etc/sudoers
+        line: "{{ username }} ALL=(ALL) NOPASSWD:ALL"
+        validate: 'visudo -cf %s'

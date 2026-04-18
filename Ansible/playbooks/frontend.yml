@@ -1,0 +1,27 @@
+---
+- name: Deploy wayshub-frontend
+  hosts: app
+  become: true
+
+  tasks:
+    - name: Clone wayshub-frontend repo
+      git:
+        repo: "{{ frontend_repo }}"
+        dest: /home/{{ ansible_user }}/wayshub-frontend
+        force: yes
+
+    - name: Build Docker image
+      community.docker.docker_image:
+        name: wayshub-frontend
+        build:
+          path: /home/{{ ansible_user }}/wayshub-frontend
+        source: build
+
+    - name: Run frontend container
+      community.docker.docker_container:
+        name: wayshub-frontend
+        image: wayshub-frontend
+        state: started
+        restart_policy: always
+        published_ports:
+          - "{{ frontend_port }}:3000"
