@@ -1,0 +1,24 @@
+---
+- hosts: gateway
+  name: "Installing Server Monitoring"
+  tasks:
+    - copy:
+        dest: "{{ remote }}/prometheus.yml"
+        src: "{{ locale }}/config/prometheus.yml"
+      name: "Sending Prometheus configuration"
+
+    - copy:
+        dest: "{{ remote }}/compose-monitoring.yml"
+        src: "{{ locale }}/dockerstuff/compose-monitoring.yml"
+      name: "Send compose.yml to server"
+
+    - community.docker.docker_compose_v2:
+        files:
+          - compose-monitoring.yml
+        project_name: monitoring
+        project_src: "{{ remote }}"
+      name: "Run Docker Compose"
+
+  vars:
+    locale: ~/Automation/Ansible/playbooks
+    remote: /home/{{ ansible_user }}/monitoring

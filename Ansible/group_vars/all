@@ -3,7 +3,7 @@ username: ramdhani
 user_password: "Ramdhani123!"
 
 # Domain
-domain: fauzi.studentdumbways.my.id
+domain: ramdhani.studentdumbways.my.id
 
 # App
 frontend_repo: https://github.com/ramdhanifauzi21/wayshub-frontend.git
@@ -13,3 +13,9 @@ frontend_port: 3000
 prometheus_port: 9090
 grafana_port: 3001
 node_exporter_port: 9100
+
+# Discord
+discord_webhook: "https://discord.com/api/webhooks/1492787518427365438/MVhUUNVl8Wb5-p7JDlsjeBw_VfzvnXUSX_mtXA9yh28RqrZGp9wFqiQKsNHbKWwTurat"
+
+# SSL
+ssl_email: "ramdhani24fauzi@gmail.com"

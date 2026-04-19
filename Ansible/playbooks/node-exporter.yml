@@ -1,0 +1,23 @@
+---
+- vars:
+    locale: ~/Automation/Ansible/playbooks
+    remote: /home/{{ ansible_user }}/monitoring
+  hosts: all
+  name: "Installing Node Exporter"
+  tasks:
+    - file:
+        path: /home/{{ ansible_user }}/monitoring
+        state: directory
+      name: "Create monitoring directory"
+
+    - copy:
+        dest: "{{ remote }}/node-exporter.yml"
+        src: "{{ locale }}/dockerstuff/node-exporter.yml"
+      name: "Sending compose.yml"
+
+    - community.docker.docker_compose_v2:
+        files:
+          - node-exporter.yml
+        project_name: monitoring
+        project_src: "{{ remote }}"
+      name: "Run Docker Compose"
