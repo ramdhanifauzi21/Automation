@@ -4,6 +4,9 @@ user_password: "Ramdhani123!"
 
 # Domain
 domain: ramdhani.studentdumbways.my.id
+exporter_domain: exporter-ramdhani.studentdumbways.my.id
+prometheus_domain: prom-ramdhani.studentdumbways.my.id
+grafana_domain: monitoring-ramdhani.studentdumbways.my.id
 
 # App
 frontend_repo: https://github.com/ramdhanifauzi21/wayshub-frontend.git
