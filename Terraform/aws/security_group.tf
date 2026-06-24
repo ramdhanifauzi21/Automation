@@ -13,6 +13,14 @@ resource "aws_security_group" "apps_sg" {
   }
 
   ingress {
+    description = "Change 22 to 6969"
+    from_port   = 6969
+    to_port     = 6969
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] 
+  }
+
+  ingress {
     description = "HTTP app staging"
     from_port   = 80
     to_port     = 80
@@ -80,6 +88,14 @@ resource "aws_security_group" "nginx_sg" {
   }
 
   ingress {
+    description = "Change 22 to 6969"
+    from_port   = 6969
+    to_port     = 6969
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     description = "HTTP"
     from_port   = 80
     to_port     = 80
@@ -130,6 +146,14 @@ resource "aws_security_group" "database_sg" {
   }
 
   ingress {
+    description = "Change 22 to 6969"
+    from_port   = 6969
+    to_port     = 6969
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     description = "PostgreSQL"
     from_port   = 5432
     to_port     = 5432
@@ -167,6 +191,14 @@ resource "aws_security_group" "monitoring_sg" {
     description = "SSH"
     from_port   = 22
     to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Change 22 to 6969"
+    from_port   = 6969
+    to_port     = 6969
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -230,6 +262,14 @@ resource "aws_security_group" "sonarqube_sg" {
   }
 
   ingress {
+    description = "Change 22 to 6969"
+    from_port   = 6969
+    to_port     = 6969
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     description = "SonarQube web"
     from_port   = 9000
     to_port     = 9000
@@ -267,6 +307,14 @@ resource "aws_security_group" "master_sg" {
     description = "SSH"
     from_port   = 22
     to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Change 22 to 6969"
+    from_port   = 6969
+    to_port     = 6969
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -317,6 +365,14 @@ resource "aws_security_group" "worker_sg" {
     description = "SSH"
     from_port   = 22
     to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Change 22 to 6969"
+    from_port   = 6969
+    to_port     = 6969
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
