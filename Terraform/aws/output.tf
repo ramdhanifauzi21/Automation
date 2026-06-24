@@ -34,7 +34,7 @@ output "worker_public_ip" {
   value       = aws_eip.worker_eip.public_ip
 }
 
-# Private IP — semua server (untuk Ansible inventory & komunikasi internal)
+# Private IP — semua server 
 output "apps_private_ip" {
   description = "Private IP server apps"
   value       = aws_instance.apps.private_ip
@@ -70,17 +70,17 @@ output "worker_private_ip" {
   value       = aws_instance.worker.private_ip
 }
 
-# SSH Command — semua server (sementara masih port 22)
+# SSH Command — semua server 
 output "ssh_commands" {
   description = "Perintah SSH untuk semua server"
   value = {
-    apps        = "ssh -i ~/.ssh/id_ed25519 ubuntu@${aws_eip.apps_eip.public_ip}"
-    nginx       = "ssh -i ~/.ssh/id_ed25519 ubuntu@${aws_eip.nginx_eip.public_ip}"
-    database    = "ssh -i ~/.ssh/id_ed25519 ubuntu@${aws_eip.database_eip.public_ip}"
-    monitoring  = "ssh -i ~/.ssh/id_ed25519 ubuntu@${aws_eip.monitoring_eip.public_ip}"
-    sonarqube   = "ssh -i ~/.ssh/id_ed25519 ubuntu@${aws_eip.sonarqube_eip.public_ip}"
-    k3s_control = "ssh -i ~/.ssh/id_ed25519 ubuntu@${aws_eip.master_eip.public_ip}"
-    k3s_worker  = "ssh -i ~/.ssh/id_ed25519 ubuntu@${aws_eip.worker_eip.public_ip}"
+    apps        = "ssh -i ~/.ssh/id_rsa ubuntu@${aws_eip.apps_eip.public_ip}"
+    nginx       = "ssh -i ~/.ssh/id_rsa ubuntu@${aws_eip.nginx_eip.public_ip}"
+    database    = "ssh -i ~/.ssh/id_rsa ubuntu@${aws_eip.database_eip.public_ip}"
+    monitoring  = "ssh -i ~/.ssh/id_rsa ubuntu@${aws_eip.monitoring_eip.public_ip}"
+    sonarqube   = "ssh -i ~/.ssh/id_rsa ubuntu@${aws_eip.sonarqube_eip.public_ip}"
+    k3s_control = "ssh -i ~/.ssh/id_rsa ubuntu@${aws_eip.master_eip.public_ip}"
+    k3s_worker  = "ssh -i ~/.ssh/id_rsa ubuntu@${aws_eip.worker_eip.public_ip}"
   }
 }
 
