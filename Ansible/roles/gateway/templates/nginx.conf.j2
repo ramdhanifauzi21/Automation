@@ -1,0 +1,166 @@
+# Load Balancing FE Staging
+upstream fe_staging {
+    server {{ appserver_ip }}:3000;
+    server {{ appserver_ip }}:3002;
+}
+
+# Staging Frontend SSL
+server {
+    listen 80;
+    server_name {{ staging_domain }};
+    return 301 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name {{ staging_domain }};
+    ssl_certificate /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ domain }}/privkey.pem;
+    location / {
+        proxy_pass http://{{ appserver_ip }}:{{ frontend_port_staging }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# Load Balancing BE Staging
+upstream be_staging {
+    server {{ appserver_ip }}:5000;
+    server {{ appserver_ip }}:5002;
+}
+
+# Staging Backend SSL
+server {
+    listen 80;
+    server_name {{ staging_api_domain }};
+    return 301 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name {{ staging_api_domain }};
+    ssl_certificate /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ domain }}/privkey.pem;
+    location / {
+        proxy_pass http://{{ appserver_ip }}:{{ backend_port_staging }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# Production Frontend SSL
+server {
+    listen 80;
+    server_name {{ domain }};
+    return 301 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name {{ domain }};
+    ssl_certificate /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ domain }}/privkey.pem;
+    location / {
+        proxy_pass http://{{ appserver_ip }}:{{ frontend_port_production }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# Production Backend SSL
+server {
+    listen 80;
+    server_name {{ production_api_domain }};
+    return 301 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name {{ production_api_domain }};
+    ssl_certificate /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ domain }}/privkey.pem;
+    location / {
+        proxy_pass http://{{ appserver_ip }}:{{ backend_port_production }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# Docker Registry
+server {
+    listen 80;
+    server_name {{ registry_domain }};
+    return 301 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name {{ registry_domain }};
+    ssl_certificate /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ domain }}/privkey.pem;
+    client_max_body_size 500m;
+    location / {
+        proxy_pass http://{{ appserver_ip }}:{{ registry_port }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+
+# Prometheus
+server {
+    listen 80;
+    server_name {{ prometheus_domain }};
+    return 301 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name {{ prometheus_domain }};
+    ssl_certificate /etc/letsencrypt/live/fauzi.studentdumbways.my.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/fauzi.studentdumbways.my.id/privkey.pem;
+
+    auth_basic "Prometheus Auth";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+
+    location / {
+        proxy_pass http://{{ db_host }}:{{ prometheus_port }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+# Grafana
+server {
+    listen 80;
+    server_name {{ grafana_domain }};
+    return 301 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name {{ grafana_domain }};
+    ssl_certificate /etc/letsencrypt/live/fauzi.studentdumbways.my.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/fauzi.studentdumbways.my.id/privkey.pem;
+    location / {
+        proxy_pass http://{{ db_host }}:{{ grafana_port }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+# Node Exporter
+server {
+    listen 80;
+    server_name {{ exporter_domain }};
+    return 301 https://$host$request_uri;
+}
+server {
+    listen 443 ssl;
+    server_name {{ exporter_domain }};
+    ssl_certificate /etc/letsencrypt/live/fauzi.studentdumbways.my.id/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/fauzi.studentdumbways.my.id/privkey.pem;
+    location / {
+        proxy_pass http://{{ db_host }}:{{ node_exporter_port }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}

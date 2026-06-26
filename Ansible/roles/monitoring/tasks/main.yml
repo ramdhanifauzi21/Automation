@@ -1,0 +1,35 @@
+---
+# MONITORING
+- name: Create monitoring directory
+  file:
+    path: /home/{{ username }}/monitoring
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0755'
+  tags: monitoring
+
+- name: Copy prometheus config
+  template:
+    src: prometheus.yml.j2
+    dest: /home/{{ username }}/monitoring/prometheus.yml
+    owner: "{{ username }}"
+    group: "{{ username }}"
+  tags: monitoring
+
+- name: Copy docker-compose monitoring
+  template:
+    src: docker-compose.yml.j2
+    dest: /home/{{ username }}/monitoring/docker-compose.yml
+    owner: "{{ username }}"
+    group: "{{ username }}"
+  tags: monitoring
+
+- name: Deploy monitoring stack
+  shell: |
+    cd /home/{{ username }}/monitoring
+    docker compose up -d
+  become_user: "{{ username }}"
+  async: 600
+  poll: 10
+  tags: monitoring

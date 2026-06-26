@@ -1,0 +1,54 @@
+---
+# DOCKER REGISTRY
+- name: Create registry directory
+  file:
+    path: /home/{{ username }}/registry
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0755'
+  tags: registry
+
+- name: Copy docker-compose registry
+  template:
+    src: docker-compose.yml.j2
+    dest: /home/{{ username }}/registry/docker-compose.yml
+    owner: "{{ username }}"
+    group: "{{ username }}"
+  tags: registry
+
+- name: Create auth directory
+  file:
+    path: /home/{{ username }}/registry/auth
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0755'
+  tags: registry
+
+- name: Install apache2-utils for htpasswd
+  apt:
+    name: apache2-utils
+    state: present
+  tags: registry
+
+- name: Create htpasswd file
+  command: >
+    htpasswd -Bbn {{ username }} {{ user_password }}
+  register: htpasswd_output
+  tags: registry
+
+- name: Save htpasswd file
+  copy:
+    content: "{{ htpasswd_output.stdout }}"
+    dest: /home/{{ username }}/registry/auth/htpasswd
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0644'
+  tags: registry
+
+- name: Deploy docker registry
+  shell: |
+    cd /home/{{ username }}/registry
+    docker compose up -d
+  tags: registry

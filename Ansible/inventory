@@ -1,9 +1,31 @@
-[app]
-fauzi-app ansible_host=157.10.160.146 
+[apps]
+apps-server ansible_host=54.254.1.21 private_ip=10.0.1.52
 
-[gateway]
-fauzi-gateway ansible_host=103.31.39.130 
+[nginx]
+nginx-server ansible_host=47.131.23.230 private_ip=10.0.1.91
+
+[database]
+database-server ansible_host=18.136.58.176 private_ip=10.0.1.247
+
+[monitoring]
+monitoring-server ansible_host=52.77.92.2 private_ip=10.0.1.37
+
+[sonarqube]
+sonarqube-server ansible_host=13.213.97.64 private_ip=10.0.1.111
+
+[k3s_master]
+master-server ansible_host=18.139.99.209 private_ip=10.0.1.10
+
+[k3s_worker]
+worker-server ansible_host=54.251.74.19 private_ip=10.0.1.23
+
+[k3s_cluster:children]
+k3s_master
+k3s_worker
 
 [all:vars]
-ansible_user=ramdhani
-ansible_ssh_private_key_file=~/.ssh/id_ed25519
+ansible_user=finaltask-fauzi
+ansible_port=22
+ansible_ssh_private_key_file=~/.ssh/id_rsa
+ansible_python_interpreter=/usr/bin/python3
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'

@@ -1,0 +1,332 @@
+# SWAP
+- name: Create swap file
+  command: fallocate -l 2G /swapfile
+  args:
+    creates: /swapfile
+  tags: swap
+
+- name: Set swap permissions
+  file:
+    path: /swapfile
+    mode: '0600'
+  tags: swap
+
+- name: Format swap
+  command: mkswap /swapfile
+  tags: swap
+
+- name: Enable swap
+  command: swapon /swapfile
+  ignore_errors: yes
+  tags: swap
+
+- name: Persist swap on reboot
+  lineinfile:
+    path: /etc/fstab
+    line: '/swapfile none swap sw 0 0'
+    state: present
+  tags: swap
+
+# UFW APPSERVER
+- name: Allow Frontend Staging port
+  ufw:
+    rule: allow
+    port: "{{ frontend_port_staging }}"
+    proto: tcp
+  tags: ufw
+
+- name: Allow Frontend Production port
+  ufw:
+    rule: allow
+    port: "{{ frontend_port_production }}"
+    proto: tcp
+  tags: ufw
+
+- name: Allow Backend Staging port
+  ufw:
+    rule: allow
+    port: "{{ backend_port_staging }}"
+    proto: tcp
+  tags: ufw
+
+- name: Allow Backend Production port
+  ufw:
+    rule: allow
+    port: "{{ backend_port_production }}"
+    proto: tcp
+  tags: ufw
+
+- name: Allow Docker Registry port
+  ufw:
+    rule: allow
+    port: "{{ registry_port }}"
+    proto: tcp
+  tags: ufw
+
+- name: Allow SonarQube port
+  ufw:
+    rule: allow
+    port: "9000"
+    proto: tcp
+  tags: ufw
+
+- name: Enable UFW
+  ufw:
+    state: enabled
+    policy: deny
+    direction: incoming
+  tags: ufw
+
+# COPY SSH KEY
+- name: Copy SSH private key to server
+  copy:
+    src: ~/.ssh/id_rsa
+    dest: /home/{{ username }}/.ssh/id_rsa
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0600'
+  tags: ssh
+
+- name: Copy SSH public key to server
+  copy:
+    src: ~/.ssh/id_rsa.pub
+    dest: /home/{{ username }}/.ssh/id_rsa.pub
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0644'
+  tags: ssh
+
+- name: Add GitHub to known_hosts
+  known_hosts:
+    name: github.com
+    key: "{{ lookup('pipe', 'ssh-keyscan github.com') }}"
+    path: /home/{{ username }}/.ssh/known_hosts
+  become_user: "{{ username }}"
+  tags: ssh
+
+# FRONTEND STAGING
+- name: Create fe-staging directory
+  file:
+    path: /home/{{ username }}/fe-staging
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0755'
+  tags: fe-staging
+
+- name: Clone FE repo staging
+  git:
+    repo: "{{ frontend_repo }}"
+    dest: /home/{{ username }}/fe-staging
+    version: staging
+    force: yes
+    key_file: /home/{{ username }}/.ssh/id_rsa
+    accept_hostkey: yes
+  become_user: "{{ username }}"
+  tags: fe-staging
+
+- name: Copy .env FE staging
+  copy:
+    src: ~/fe-dumbmerch/.env
+    dest: /home/{{ username }}/fe-staging/.env
+    owner: "{{ username }}"
+    group: "{{ username }}"
+  tags: fe-staging
+
+- name: Deploy FE staging
+  shell: |
+    cd /home/{{ username }}/fe-staging
+    docker compose up -d --build
+  become_user: "{{ username }}"
+  async: 600
+  poll: 10
+  tags: fe-staging
+
+# BACKEND STAGING
+- name: Create be-staging directory
+  file:
+    path: /home/{{ username }}/be-staging
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0755'
+  tags: be-staging
+
+- name: Clone BE repo staging
+  git:
+    repo: "{{ backend_repo }}"
+    dest: /home/{{ username }}/be-staging
+    version: staging
+    force: yes
+    key_file: /home/{{ username }}/.ssh/id_rsa
+    accept_hostkey: yes
+  become_user: "{{ username }}"
+  tags: be-staging
+
+- name: Copy .env BE staging
+  copy:
+    src: ~/be-dumbmerch/.env
+    dest: /home/{{ username }}/be-staging/.env
+    owner: "{{ username }}"
+    group: "{{ username }}"
+  tags: be-staging
+
+- name: Deploy BE staging
+  shell: |
+    cd /home/{{ username }}/be-staging
+    docker compose up -d --build
+  become_user: "{{ username }}"
+  async: 600
+  poll: 10
+  tags: be-staging
+
+# FRONTEND PRODUCTION
+- name: Create fe-production directory
+  file:
+    path: /home/{{ username }}/fe-production
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0755'
+  tags: fe-production
+
+- name: Clone FE repo production
+  git:
+    repo: "{{ frontend_repo }}"
+    dest: /home/{{ username }}/fe-production
+    version: production
+    force: yes
+    key_file: /home/{{ username }}/.ssh/id_rsa
+    accept_hostkey: yes
+  become_user: "{{ username }}"
+  tags: fe-production
+
+- name: Copy .env FE production
+  copy:
+    src: ~/fe-dumbmerch/.env
+    dest: /home/{{ username }}/fe-production/.env
+    owner: "{{ username }}"
+    group: "{{ username }}"
+  tags: fe-production
+
+- name: Deploy FE production
+  shell: |
+    cd /home/{{ username }}/fe-production
+    docker compose up -d --build
+  become_user: "{{ username }}"
+  async: 600
+  poll: 10
+  tags: fe-production
+
+# BACKEND PRODUCTION
+- name: Create be-production directory
+  file:
+    path: /home/{{ username }}/be-production
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0755'
+  tags: be-production
+
+- name: Clone BE repo production
+  git:
+    repo: "{{ backend_repo }}"
+    dest: /home/{{ username }}/be-production
+    version: production
+    force: yes
+    key_file: /home/{{ username }}/.ssh/id_rsa
+    accept_hostkey: yes
+  become_user: "{{ username }}"
+  tags: be-production
+
+- name: Copy .env BE production
+  copy:
+    src: ~/be-dumbmerch/.env
+    dest: /home/{{ username }}/be-production/.env
+    owner: "{{ username }}"
+    group: "{{ username }}"
+  tags: be-production
+
+- name: Deploy BE production
+  shell: |
+    cd /home/{{ username }}/be-production
+    docker compose up -d --build
+  become_user: "{{ username }}"
+  async: 600
+  poll: 10
+  tags: be-production
+
+# MONITORING
+- name: Create monitoring directory
+  file:
+    path: /home/{{ username }}/monitoring
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0755'
+  tags: monitoring
+
+- name: Copy docker-compose monitoring
+  template:
+    src: monitoring.yml.j2
+    dest: /home/{{ username }}/monitoring/docker-compose.yml
+    owner: "{{ username }}"
+    group: "{{ username }}"
+  tags: monitoring
+
+- name: Deploy monitoring
+  shell: |
+    cd /home/{{ username }}/monitoring
+    docker compose up -d
+  become_user: "{{ username }}"
+  async: 600
+  poll: 10
+  tags: monitoring
+
+# SONARQUBE
+- name: Set vm.max_map_count for SonarQube
+  sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    state: present
+    reload: yes
+  tags: sonarqube
+
+- name: Create SonarQube directory
+  file:
+    path: /home/{{ username }}/sonarqube
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0755'
+  tags: sonarqube
+
+- name: Copy docker-compose SonarQube
+  template:
+    src: sonarqube.yml.j2
+    dest: /home/{{ username }}/sonarqube/docker-compose.yml
+    owner: "{{ username }}"
+    group: "{{ username }}"
+  tags: sonarqube
+
+- name: Set permission sonarqube directories
+  file:
+    path: /home/{{ username }}/sonarqube/{{ item }}
+    state: directory
+    owner: "1000"
+    group: "1000"
+    mode: '0755'
+  loop:
+    - data
+    - logs
+    - extensions
+  tags: sonarqube
+
+- name: Deploy SonarQube
+  shell: |
+    cd /home/{{ username }}/sonarqube
+    docker compose up -d
+  become_user: "{{ username }}"
+  async: 600
+  poll: 10
+  tags: sonarqube
