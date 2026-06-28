@@ -1,0 +1,72 @@
+# DOCKER
+- name: Install dependencies
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: present
+    update_cache: yes
+  tags: docker
+
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  tags: docker
+
+- name: Add Docker repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu jammy stable"
+    state: present
+  tags: docker
+
+- name: Kill unattended-upgrades
+  shell: |
+    systemctl stop unattended-upgrades
+    killall unattended-upgr || true
+    rm -f /var/lib/dpkg/lock-frontend
+    rm -f /var/lib/dpkg/lock
+    rm -f /var/cache/apt/archives/lock
+    dpkg --configure -a
+  ignore_errors: yes
+  tags: docker
+
+- name: Install Docker
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+    state: present
+    update_cache: yes
+  tags: docker
+
+- name: Add user to docker group
+  user:
+    name: "{{ username }}"
+    groups: docker
+    append: yes
+  tags: docker
+
+- name: Start and enable Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  tags: docker
+
+
+- name: Hapus direktori data Docker
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /var/lib/docker
+    - /var/lib/containerd
+    - /etc/docker
+    - /var/run/docker.sock
+  tags: uninstall-docker

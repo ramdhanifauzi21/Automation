@@ -1,32 +1,3 @@
-# SWAP
-- name: Create swap file
-  command: fallocate -l 2G /swapfile
-  args:
-    creates: /swapfile
-  tags: swap
-
-- name: Set swap permissions
-  file:
-    path: /swapfile
-    mode: '0600'
-  tags: swap
-
-- name: Format swap
-  command: mkswap /swapfile
-  tags: swap
-
-- name: Enable swap
-  command: swapon /swapfile
-  ignore_errors: yes
-  tags: swap
-
-- name: Persist swap on reboot
-  lineinfile:
-    path: /etc/fstab
-    line: '/swapfile none swap sw 0 0'
-    state: present
-  tags: swap
-
 # UFW APPSERVER
 - name: Allow Frontend Staging port
   ufw:
@@ -60,13 +31,6 @@
   ufw:
     rule: allow
     port: "{{ registry_port }}"
-    proto: tcp
-  tags: ufw
-
-- name: Allow SonarQube port
-  ufw:
-    rule: allow
-    port: "9000"
     proto: tcp
   tags: ufw
 

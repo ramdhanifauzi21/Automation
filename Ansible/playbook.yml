@@ -5,29 +5,35 @@
   roles:
     - server
 
+- name: Setup Docker Server
+  hosts: docker_server
+  become: yes
+  roles:
+    - docker-server
+
 #- name: Gateway Setup
 #  hosts: gateway
 #  become: yes
 #  roles:
 #    - gateway
 #
-#- name: Appserver Setup
-#  hosts: app
-#  become: yes
-#  roles:
-#    - appserver
-#
-#- name: Database Setup
-#  hosts: database
-#  become: yes
-#  roles:
-#    - database
-#
-#- name: Registry Setup
-#  hosts: app
-#  become: yes
-#  roles:
-#    - registry
+- name: Appserver Setup
+  hosts: apps
+  become: yes
+  roles:
+    - appserver
+
+- name: Database Setup
+  hosts: database
+  become: yes
+  roles:
+    - database
+
+- name: Registry Setup
+  hosts: apps
+  become: yes
+  roles:
+    - registry
 #
 #- name: Monitoring Setup
 #  hosts: database

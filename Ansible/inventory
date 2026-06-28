@@ -19,13 +19,20 @@ master-server ansible_host=18.139.99.209 private_ip=10.0.1.10
 [k3s_worker]
 worker-server ansible_host=54.251.74.19 private_ip=10.0.1.23
 
+[docker_server]
+apps-server
+nginx-server
+database-server
+monitoring-server
+sonarqube-server
+
 [k3s_cluster:children]
 k3s_master
 k3s_worker
 
 [all:vars]
 ansible_user=finaltask-fauzi
-ansible_port=22
+ansible_port=6969
 ansible_ssh_private_key_file=~/.ssh/id_rsa
 ansible_python_interpreter=/usr/bin/python3
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
